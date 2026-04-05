@@ -14,7 +14,8 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const sidebarItems = [
   { icon: <Home className="h-5 w-5" />, label: "Overview", href: "/dashboard" },
@@ -31,6 +32,30 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+    } else {
+      setIsAuthorized(true);
+    }
+  }, [router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push("/login");
+  };
+
+  if (!isAuthorized) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-black text-white">
@@ -68,7 +93,10 @@ export default function DashboardLayout({
             <Settings className="h-5 w-5" />
             Settings
           </button>
-          <button className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-400/60 transition-all hover:bg-red-500/10 hover:text-red-400">
+          <button 
+            onClick={handleLogout}
+            className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-400/60 transition-all hover:bg-red-500/10 hover:text-red-400"
+          >
             <LogOut className="h-5 w-5" />
             Logout
           </button>

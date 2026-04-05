@@ -4,15 +4,40 @@ import { motion } from "framer-motion";
 import { Github, Mail } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import axios from "@/lib/axios";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Logic for signup later
-    setTimeout(() => setIsLoading(false), 2000);
+    setError("");
+    
+    try {
+      const response = await axios.post("/auth/signup", {
+        firstName,
+        lastName,
+        email,
+        password,
+      });
+      
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -33,12 +58,20 @@ export default function SignupPage() {
           <p className="mt-2 text-white/60 text-sm">Join the platform for modern freelancers</p>
         </div>
 
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-500/10 p-3 text-xs text-red-400 border border-red-500/20">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-white/80 mb-1.5">First name</label>
               <input
                 type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 placeholder="John"
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm transition-all focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20"
                 required
@@ -48,6 +81,8 @@ export default function SignupPage() {
               <label className="block text-sm font-medium text-white/80 mb-1.5">Last name</label>
               <input
                 type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 placeholder="Doe"
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm transition-all focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20"
                 required
@@ -59,6 +94,8 @@ export default function SignupPage() {
             <label className="block text-sm font-medium text-white/80 mb-1.5">Email address</label>
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
               className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm transition-all focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20"
               required
@@ -69,6 +106,8 @@ export default function SignupPage() {
             <label className="block text-sm font-medium text-white/80 mb-1.5">Password</label>
             <input
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm transition-all focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20"
               required
