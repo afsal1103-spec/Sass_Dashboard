@@ -14,12 +14,17 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/analytics")
-@RequiredArgsConstructor
 public class AnalyticsController {
 
     private final ProjectRepository projectRepository;
     private final ClientRepository clientRepository;
     private final InvoiceRepository invoiceRepository;
+
+    public AnalyticsController(ProjectRepository projectRepository, ClientRepository clientRepository, InvoiceRepository invoiceRepository) {
+        this.projectRepository = projectRepository;
+        this.clientRepository = clientRepository;
+        this.invoiceRepository = invoiceRepository;
+    }
 
     @GetMapping("/summary")
     public Map<String, Object> getSummary() {

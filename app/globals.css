@@ -3,22 +3,87 @@
 @tailwind utilities;
 
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
+  --background: #050b16;
+  --foreground: #ecf2ff;
+  --surface: rgba(12, 25, 44, 0.72);
+  --surface-strong: rgba(10, 20, 36, 0.9);
+  --border-soft: rgba(136, 203, 255, 0.2);
+  --accent: #4cc9f0;
+  --accent-2: #ffb703;
+  --success: #54d18c;
+  --danger: #ff6b6b;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background:
+    radial-gradient(circle at 18% 10%, rgba(76, 201, 240, 0.2), transparent 36%),
+    radial-gradient(circle at 86% 0%, rgba(255, 183, 3, 0.18), transparent 30%),
+    linear-gradient(155deg, #050b16 0%, #08182b 55%, #071c2f 100%);
+  min-height: 100vh;
 }
 
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
+* {
+  border-color: var(--border-soft);
+}
+
+.surface {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(2, 8, 20, 0.4);
 }
 
-.premium-gradient {
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+.surface-strong {
+  background: var(--surface-strong);
+  border: 1px solid rgba(118, 189, 248, 0.26);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.soft-glow:hover {
+  box-shadow:
+    0 0 0 1px rgba(118, 189, 248, 0.32),
+    0 14px 44px rgba(4, 20, 38, 0.5);
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(145, 198, 238, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(145, 198, 238, 0.08) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(circle at center, black, transparent 80%);
+}
+
+.gradient-text {
+  background: linear-gradient(110deg, #dff6ff 0%, #76d4ff 45%, #ffd16d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.data-chip {
+  border: 1px solid rgba(126, 198, 255, 0.35);
+  background: rgba(11, 28, 49, 0.82);
+  color: rgba(223, 246, 255, 0.88);
+}
+
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  border-radius: inherit;
+  border: 1px solid transparent;
+  background: linear-gradient(130deg, rgba(118, 212, 255, 0.4), rgba(255, 209, 109, 0.2)) border-box;
+  mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+::selection {
+  background: rgba(76, 201, 240, 0.28);
+  color: #eff8ff;
 }
