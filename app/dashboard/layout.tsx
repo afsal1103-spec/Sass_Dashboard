@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 
 const sidebarItems = [
   {
@@ -123,6 +123,7 @@ export default function DashboardLayout({
 
   const fullName = user ? `${user.firstName} ${user.lastName}` : "Freelancer";
   const initials = user ? `${user.firstName[0]}${user.lastName[0]}` : "FL";
+  const liftTransition = { type: "spring", stiffness: 360, damping: 24 };
 
   if (!isAuthorized) {
     return (
@@ -164,43 +165,58 @@ export default function DashboardLayout({
             {sidebarItems.map((item) => {
               const isActive = item.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(item.href);
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  title={item.label}
-                  className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all ${
-                    isActive
-                      ? "surface-strong text-[#f6fbff]"
-                      : "text-[#d2e9ff]/75 hover:bg-[#0d2a46] hover:text-[#f6fbff]"
-                  }`}
-                >
-                  <div className={`${isActive ? "text-[#7ed5ff]" : "text-[#acd7ff]/75"}`}>{item.icon}</div>
-                  {!isCollapsed && (
-                    <div>
-                      <p className="text-sm font-semibold">{item.label}</p>
-                      <p className="text-[11px] text-[#acd7ff]/70">{item.helper}</p>
-                    </div>
-                  )}
-                  {isActive && <span className="absolute right-2 h-2 w-2 rounded-full bg-[#ffd16d]" />}
-                </Link>
+                <motion.div key={item.href} whileHover={{ y: -1 }} whileTap={{ scale: 0.99 }} transition={liftTransition}>
+                  <Link
+                    href={item.href}
+                    title={item.label}
+                    className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all ${
+                      isActive
+                        ? "surface-strong text-[#f6fbff]"
+                        : "text-[#d2e9ff]/75 hover:bg-[#0d2a46] hover:text-[#f6fbff]"
+                    }`}
+                  >
+                    <div className={`${isActive ? "text-[#7ed5ff]" : "text-[#acd7ff]/75"}`}>{item.icon}</div>
+                    {!isCollapsed && (
+                      <div>
+                        <p className="text-sm font-semibold">{item.label}</p>
+                        <p className="text-[11px] text-[#acd7ff]/70">{item.helper}</p>
+                      </div>
+                    )}
+                    {isActive && (
+                      <motion.span
+                        layoutId="active-dot"
+                        className="absolute right-2 h-2 w-2 rounded-full bg-[#ffd16d]"
+                        transition={{ type: "spring", stiffness: 500, damping: 32 }}
+                      />
+                    )}
+                  </Link>
+                </motion.div>
               );
             })}
           </nav>
 
           <div className="mt-auto space-y-2 border-t border-[#8ccfff]/15 pt-5">
-            <button className={`w-full rounded-xl border border-[#8ccfff]/20 bg-[#0b223a]/80 px-3 py-2.5 text-sm text-[#d2e9ff] transition hover:border-[#8ccfff]/40 ${isCollapsed ? "text-center" : "text-left"}`}>
+            <motion.button
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.99 }}
+              transition={liftTransition}
+              className={`w-full rounded-xl border border-[#8ccfff]/20 bg-[#0b223a]/80 px-3 py-2.5 text-sm text-[#d2e9ff] transition hover:border-[#8ccfff]/40 ${isCollapsed ? "text-center" : "text-left"}`}
+            >
               <span className="inline-flex items-center gap-2">
                 <Settings className="h-4 w-4" /> {!isCollapsed && "Settings"}
               </span>
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               onClick={handleLogout}
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.99 }}
+              transition={liftTransition}
               className={`w-full rounded-xl border border-[#ff9a9a]/30 bg-[#3c1a22]/65 px-3 py-2.5 text-sm text-[#ffd6d6] transition hover:border-[#ff9a9a]/55 ${isCollapsed ? "text-center" : "text-left"}`}
             >
               <span className="inline-flex items-center gap-2">
                 <LogOut className="h-4 w-4" /> {!isCollapsed && "Logout"}
               </span>
-            </button>
+            </motion.button>
           </div>
         </div>
       </motion.aside>
@@ -214,43 +230,55 @@ export default function DashboardLayout({
         <header className="surface spotlight relative mb-6 overflow-hidden rounded-2xl px-5 py-4 md:px-6">
           <div className="absolute -top-10 right-0 h-36 w-36 rounded-full bg-[#4cc9f0]/20 blur-3xl" />
           <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8ccfff]">{now}</p>
               <h1 className="mt-1 font-[var(--font-space)] text-2xl font-semibold text-[#f5fbff] md:text-3xl">{pageTitle}</h1>
               <p className="mt-1 text-sm text-[#cae7ff]/80">
                 Welcome back, <span className="font-semibold text-[#f7fbff]">{fullName}</span>. Focus on what ships and what gets paid.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="flex flex-wrap items-center gap-2 md:justify-end">
-              <Link
-                href="/dashboard/projects"
-                className="data-chip inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold"
-              >
-                <Plus className="h-3.5 w-3.5" /> New Project
-              </Link>
-              <Link
-                href="/dashboard/proposals"
-                className="data-chip inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold"
-              >
-                <Sparkles className="h-3.5 w-3.5" /> Generate Proposal
-              </Link>
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.05 }}
+              className="flex flex-wrap items-center gap-2 md:justify-end"
+            >
+              <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} transition={liftTransition}>
+                <Link
+                  href="/dashboard/projects"
+                  className="data-chip inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold"
+                >
+                  <Plus className="h-3.5 w-3.5" /> New Project
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} transition={liftTransition}>
+                <Link
+                  href="/dashboard/proposals"
+                  className="data-chip inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold"
+                >
+                  <Sparkles className="h-3.5 w-3.5" /> Generate Proposal
+                </Link>
+              </motion.div>
               <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#8ccfff]/30 bg-[#0e2d4b] text-xs font-bold text-[#f7fbff]">
                 {initials}
               </div>
-            </div>
+            </motion.div>
           </div>
         </header>
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
           <motion.div
             key={pathname}
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.22, ease: "easeOut" }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+            className="w-full"
           >
-            {children}
+            <Suspense fallback={null}>
+              {children}
+            </Suspense>
           </motion.div>
         </AnimatePresence>
       </motion.main>

@@ -12,10 +12,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/projects")
 public class ProjectController {
+    private static final Set<String> VALID_STATUSES = Set.of("PLANNED", "IN_PROGRESS", "COMPLETED", "ON_HOLD", "CANCELLED");
 
     private final ProjectRepository projectRepository;
     private final ClientRepository clientRepository;
@@ -35,7 +38,6 @@ public class ProjectController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Project project) {
         try {
-            System.out.println("DEBUG: Received project creation request: " + project.getTitle());
             if (project.getTitle() == null || project.getTitle().isEmpty()) {
                 return ResponseEntity.badRequest().body("Project title is required");
             }
@@ -44,47 +46,29 @@ public class ProjectController {
             }
 
             User user = getCurrentUser();
-            System.out.println("DEBUG: Current user: ID=" + user.getId() + ", Email=" + user.getEmail());
+            Client client = clientRepository.findById(project.getClient().getId())
+                    .orElse(null);
 
-            Client client = clientRepository.findById(project.getClient().getId()).orElse(null);
+            if (client == null) return ResponseEntity.status(404).body("Client not found");
 
-            if (client == null) {
-                System.out.println("DEBUG: Client not found with ID: " + project.getClient().getId());
-                return ResponseEntity.status(404).body("Client not found");
-            }
-
-            System.out.println("DEBUG: Found client: " + client.getName() + " (ID=" + client.getId() + ")");
-            
-            // Check if client has a user assigned
+            // Backfill ownership for legacy records created before user-scoped clients.
             if (client.getUser() == null) {
-                System.out.println("DEBUG: Client has no owner assigned!");
-                return ResponseEntity.status(403).body("Client has no owner");
-            }
-
-            System.out.println("DEBUG: Client owner ID: " + client.getUser().getId());
-
-            if (!client.getUser().getId().equals(user.getId())) {
-                System.out.println("DEBUG: Permission denied! Client owner ID (" + client.getUser().getId() + ") != Current user ID (" + user.getId() + ")");
+                client.setUser(user);
+                client = clientRepository.save(client);
+            } else if (!client.getUser().getId().equals(user.getId())) {
                 return ResponseEntity.status(403).body("You don't have permission to create projects for this client");
             }
 
-            // Validate status against DB constraint values
-            List<String> validStatuses = List.of("PLANNED", "IN_PROGRESS", "COMPLETED", "ON_HOLD", "CANCELLED");
-            if (project.getStatus() != null) {
-                String status = project.getStatus().toUpperCase().replace(" ", "_");
-                if (!validStatuses.contains(status)) {
-                    return ResponseEntity.badRequest().body("Invalid status. Allowed values: " + validStatuses);
-                }
-                project.setStatus(status);
+            String normalizedStatus = normalizeStatus(project.getStatus());
+            if (normalizedStatus == null) {
+                return ResponseEntity.badRequest().body("Invalid status. Allowed values: " + VALID_STATUSES);
             }
 
+            project.setStatus(normalizedStatus);
             project.setClient(client);
             Project saved = projectRepository.save(project);
-            System.out.println("DEBUG: Project saved successfully with ID: " + saved.getId());
             return ResponseEntity.ok(saved);
         } catch (Exception e) {
-            System.out.println("DEBUG: Error in project creation: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Internal server error: " + e.getMessage());
         }
     }
@@ -117,9 +101,13 @@ public class ProjectController {
                     if (!project.getClient().getUser().getId().equals(user.getId())) {
                         return ResponseEntity.status(403).body("You don't have permission to update this project");
                     }
+                    String normalizedStatus = normalizeStatus(updated.getStatus());
+                    if (normalizedStatus == null) {
+                        return ResponseEntity.badRequest().body("Invalid status. Allowed values: " + VALID_STATUSES);
+                    }
                     project.setTitle(updated.getTitle());
                     project.setDescription(updated.getDescription());
-                    project.setStatus(updated.getStatus());
+                    project.setStatus(normalizedStatus);
                     project.setDeadline(updated.getDeadline());
                     return ResponseEntity.ok(projectRepository.save(project));
                 })
@@ -138,5 +126,13 @@ public class ProjectController {
                     return ResponseEntity.ok().build();
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    private String normalizeStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return "PLANNED";
+        }
+        String normalized = status.trim().replace(" ", "_").toUpperCase(Locale.ROOT);
+        return VALID_STATUSES.contains(normalized) ? normalized : null;
     }
 }

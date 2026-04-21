@@ -50,37 +50,33 @@ export default function Home() {
           <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#4cc9f0]/20 blur-3xl" />
           <div className="absolute -bottom-20 left-10 h-56 w-56 rounded-full bg-[#ffb703]/15 blur-3xl" />
 
-          <div className="relative">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#8ccfff]/30 bg-[#10314f]/70 px-3 py-1.5 text-xs font-semibold text-[#bfe7ff]">
-              <Sparkles className="h-3.5 w-3.5" /> Built for independent freelancers
+          <div className="relative flex flex-col items-center text-center">
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#0a111a] px-3.5 py-1.5 text-xs font-medium text-white/60">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#4cc9f0]" /> Powered by AI Analytics
             </div>
 
-            <h1 className="mt-4 max-w-4xl font-[var(--font-space)] text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
-              Run Your Freelance Business Like a
-              <span className="gradient-text"> Real Operating System</span>
+            <h1 className="max-w-4xl font-[var(--font-space)] text-5xl font-semibold leading-[1.1] text-white sm:text-6xl lg:text-7xl">
+              The Intelligent OS for <br className="hidden sm:block" />
+              <span className="text-white/40">Modern Freelancers</span>
             </h1>
 
-            <p className="mt-4 max-w-2xl text-base text-[#cae7ff]/80 sm:text-lg">
-              Sass Dashboard helps you manage clients, projects, invoices, and proposals with one consistent workflow so you spend less time on admin and more time shipping.
+            <p className="mt-8 max-w-2xl text-base text-[#cae7ff]/60 sm:text-lg">
+              Manage clients, track projects, and generate smart invoices with AI-powered proposals. All in one place.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#ffd16d] px-6 py-3 text-sm font-semibold text-[#132a42] transition hover:bg-[#ffe09c]"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-sm font-bold text-black transition-all hover:bg-white/90 active:scale-[0.98]"
               >
-                Create Your Workspace <ArrowRight className="h-4 w-4" />
+                Start Building <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 rounded-xl border border-[#8ccfff]/30 bg-[#0f2c4a]/75 px-6 py-3 text-sm font-semibold text-[#dff4ff] transition hover:border-[#8ccfff]/55"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-[#161b22] px-8 py-4 text-sm font-bold text-white transition-all hover:bg-[#1c2128] active:scale-[0.98]"
               >
                 Sign In
               </Link>
-            </div>
-
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-[#8ccfff]/20 bg-[#0d2743]/65 px-3 py-1.5 text-xs text-[#c4e9ff]">
-              <LineChart className="h-3.5 w-3.5 text-[#8fd8ff]" /> Trusted flow: lead to delivery to payment
             </div>
           </div>
         </motion.div>

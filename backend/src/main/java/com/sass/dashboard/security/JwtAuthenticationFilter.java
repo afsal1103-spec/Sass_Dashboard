@@ -46,10 +46,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(7);
+        log.info("Processing JWT for URI: {}", request.getRequestURI());
         try {
             userEmail = jwtService.extractUsername(jwt);
+            log.info("Extracted email from token: {}", userEmail);
         } catch (Exception e) {
-            log.error("Failed to extract username from token: {}", e.getMessage());
+            log.error("Failed to extract username from token: {}. Error: {}", jwt, e.getMessage());
             filterChain.doFilter(request, response);
             return;
         }
@@ -57,7 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
             if (jwtService.isTokenValid(jwt, userDetails)) {
-                log.info("Token valid for user: {}. Setting authentication context.", userEmail);
+                log.info("Token is valid for user: {}. Authorities: {}", userEmail, userDetails.getAuthorities());
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,

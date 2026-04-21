@@ -24,21 +24,41 @@ public class ClientController {
     }
 
     private User getCurrentUser() {
-        String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            String email = ((UserDetails) principal).getUsername();
+            return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found in database: " + email));
+        }
+        throw new RuntimeException("User not authenticated correctly. Principal is: " + principal.toString());
     }
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Client client) {
-        if (client.getEmail() == null || client.getEmail().isEmpty()) {
-            return ResponseEntity.badRequest().body("Email is required");
+        try {
+            System.out.println("DEBUG: Received client creation request for: " + client.getName());
+            
+            if (client.getEmail() == null || client.getEmail().isEmpty()) {
+                return ResponseEntity.badRequest().body("Email is required");
+            }
+            if (client.getName() == null || client.getName().isEmpty()) {
+                return ResponseEntity.badRequest().body("Name is required");
+            }
+            
+            User currentUser = getCurrentUser();
+            System.out.println("DEBUG: Current user for client creation: " + currentUser.getEmail());
+            
+            client.setUser(currentUser);
+            Client saved = repo.save(client);
+            System.out.println("DEBUG: Client saved successfully with ID: " + saved.getId());
+            return ResponseEntity.ok(saved);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            System.out.println("DEBUG: Data integrity violation: " + e.getMessage());
+            return ResponseEntity.badRequest().body("A client with this email already exists.");
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error in client creation: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Internal server error: " + e.getMessage());
         }
-        if (client.getName() == null || client.getName().isEmpty()) {
-            return ResponseEntity.badRequest().body("Name is required");
-        }
-        
-        client.setUser(getCurrentUser());
-        return ResponseEntity.ok(repo.save(client));
     }
 
     @GetMapping

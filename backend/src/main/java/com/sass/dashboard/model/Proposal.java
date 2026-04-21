@@ -20,13 +20,14 @@ public class Proposal {
 
     @Column(columnDefinition = "TEXT")
     private String content;
+    private String purpose = "PROPOSAL";
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "client_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Client client;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Project project;
@@ -37,10 +38,11 @@ public class Proposal {
 
     public Proposal() {}
 
-    public Proposal(Long id, String title, String content, Client client, Project project, LocalDateTime createdAt, ProposalStatus status) {
+    public Proposal(Long id, String title, String content, String purpose, Client client, Project project, LocalDateTime createdAt, ProposalStatus status) {
         this.id = id;
         this.title = title;
         this.content = content;
+        this.purpose = purpose;
         this.client = client;
         this.project = project;
         this.createdAt = createdAt;
@@ -55,6 +57,7 @@ public class Proposal {
         private Long id;
         private String title;
         private String content;
+        private String purpose = "PROPOSAL";
         private Client client;
         private Project project;
         private LocalDateTime createdAt = LocalDateTime.now();
@@ -63,13 +66,14 @@ public class Proposal {
         public ProposalBuilder id(Long id) { this.id = id; return this; }
         public ProposalBuilder title(String title) { this.title = title; return this; }
         public ProposalBuilder content(String content) { this.content = content; return this; }
+        public ProposalBuilder purpose(String purpose) { this.purpose = purpose; return this; }
         public ProposalBuilder client(Client client) { this.client = client; return this; }
         public ProposalBuilder project(Project project) { this.project = project; return this; }
         public ProposalBuilder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
         public ProposalBuilder status(ProposalStatus status) { this.status = status; return this; }
 
         public Proposal build() {
-            return new Proposal(id, title, content, client, project, createdAt, status);
+            return new Proposal(id, title, content, purpose, client, project, createdAt, status);
         }
     }
 
@@ -79,6 +83,8 @@ public class Proposal {
     public void setTitle(String title) { this.title = title; }
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
+    public String getPurpose() { return purpose; }
+    public void setPurpose(String purpose) { this.purpose = purpose; }
     public Client getClient() { return client; }
     public void setClient(Client client) { this.client = client; }
     public Project getProject() { return project; }
